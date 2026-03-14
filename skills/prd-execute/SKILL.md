@@ -167,3 +167,6 @@ The memory file is the ONLY way context survives between Claude Code sessions. T
 - NEVER overwrite memory — only append
 - If the PRD file is missing, STOP and tell the user
 - **After writing or updating each session file** (task-N.md, status.md, memory.md), print its full contents to the console so the user can review it. Use a header like `📄 {filename}:` followed by the file content in a fenced code block
+- **UI fidelity matching**: When a task includes UI reference images, assess their fidelity level:
+  - **Low fidelity** (black and white wireframes, sketches, grayscale mockups): Use the project's existing UI components, design system, styles, and patterns to implement the intended layout and functionality. Do NOT replicate the wireframe's visual style — instead, translate the wireframe's intent into the project's established look and feel.
+  - **High fidelity** (polished designs with colors, typography, and styling): Match the design as closely as possible, including colors, spacing, typography, and visual details.
