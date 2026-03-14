@@ -6,7 +6,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-REPO="https://github.com/anthropics/skill-prd.git"
+REPO="https://github.com/todiadiyatmo/prd-coder.git"
 ACTION="${1:-install}"
 
 if [[ "$ACTION" != "install" && "$ACTION" != "uninstall" ]]; then

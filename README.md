@@ -18,21 +18,15 @@ PRD Implementor gives Claude Code **persistent memory on disk**. It:
 ## Install
 
 ```bash
-git clone <this-repo> prd-implementor
-cd prd-implementor
-chmod +x install.sh
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/todiadiyatmo/prd-coder/main/bootstrap.sh | bash -s -- install
 ```
 
-Or manually copy files to `~/.claude/`:
-```
-~/.claude/
-├── agents/prd-implementor.md
-├── skills/
-│   ├── prd-plan/SKILL.md
-│   ├── prd-execute/SKILL.md
-│   └── prd-status/SKILL.md
-└── tasks/              ← created automatically
+### Manual install
+
+```bash
+git clone https://github.com/todiadiyatmo/prd-coder.git
+cd prd-coder
+./install.sh
 ```
 
 ## Usage
@@ -153,8 +147,7 @@ Each task targets 15-30 minutes of implementation work.
 ## Uninstall
 
 ```bash
-chmod +x uninstall.sh
-./uninstall.sh
+curl -fsSL https://raw.githubusercontent.com/todiadiyatmo/prd-coder/main/bootstrap.sh | bash -s -- uninstall
 ```
 
 This removes agents, skills, and commands. Optionally deletes task data.
