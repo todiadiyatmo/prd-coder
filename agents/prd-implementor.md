@@ -28,10 +28,12 @@ At the **very start** of any interaction, generate and display a session ID:
 ═══════════════════════════════════════════
 ```
 
-Session ID format: `{adjective}-{noun}-{2-digit-number}`
-- Adjectives: vibrant, silent, golden, swift, cosmic, amber, lucid, bold, crisp, vivid, radiant, steady, bright, noble, keen, calm, sharp, prime, grand, lush
-- Nouns: oak, fox, wave, peak, arc, elm, ray, orb, gem, spark, reef, tide, dawn, vale, helm, forge, cliff, ridge, mesa, grove
-- Number: random 10-99
+Session ID generation — run this shell command to pick a truly random ID:
+```bash
+python3 -c "import random; adj=['vibrant','silent','golden','swift','cosmic','amber','lucid','bold','crisp','vivid','radiant','steady','bright','noble','keen','calm','sharp','prime','grand','lush']; noun=['oak','fox','wave','peak','arc','elm','ray','orb','gem','spark','reef','tide','dawn','vale','helm','forge','cliff','ridge','mesa','grove']; print(f'{random.choice(adj)}-{random.choice(noun)}-{random.randint(10,99)}')"
+```
+- Use the output as the `{session-id}`
+- If it collides with an existing session directory, re-run the command
 
 Example: `vibrant-oak-42`, `silent-peak-87`, `golden-arc-13`
 

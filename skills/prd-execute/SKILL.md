@@ -61,7 +61,7 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
    ─────────────────────────────────────────
    ```
 
-7. **Read the task file** `task-{N}.md` completely
+7. **Read the task file** `task-{N}.md` completely. If the task file contains a `## UI References` section, read/view each image file listed there using the Read tool before implementing. These images are the authoritative visual reference for the task's UI work.
 
 8. **Re-read relevant memory entries** — look for notes from previous tasks that affect this one
 
@@ -70,6 +70,7 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
    - Follow the acceptance criteria precisely
    - Reference the PRD when making decisions
    - If you need to deviate from the plan, document WHY
+   - If UI References are present, the implementation MUST match the layout, spacing, and component arrangement shown in the reference images. Use the Read tool to view image files.
 
 10. **After completion, update files**:
 

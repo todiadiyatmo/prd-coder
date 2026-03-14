@@ -172,11 +172,12 @@ After printing the confirmation, **print the full contents of the new `task-{N+1
 
 ## [Planning Mode] — Create a new plan from a PRD
 
-2. **Generate a session ID** (Planning Mode only): `{adjective}-{noun}-{number}`
-   - Adjectives: vibrant, silent, golden, swift, cosmic, amber, lucid, bold, crisp, vivid, radiant, steady, bright, noble, keen, calm, sharp, prime, grand, lush
-   - Nouns: oak, fox, wave, peak, arc, elm, ray, orb, gem, spark, reef, tide, dawn, vale, helm, forge, cliff, ridge, mesa, grove
-   - Number: random 10-99
-   - Check `{base-dir}` to ensure no collision (where `{base-dir}` was resolved in step 1)
+2. **Generate a session ID** (Planning Mode only): Run this shell command to generate a random session ID:
+   ```bash
+   python3 -c "import random; adj=['vibrant','silent','golden','swift','cosmic','amber','lucid','bold','crisp','vivid','radiant','steady','bright','noble','keen','calm','sharp','prime','grand','lush']; noun=['oak','fox','wave','peak','arc','elm','ray','orb','gem','spark','reef','tide','dawn','vale','helm','forge','cliff','ridge','mesa','grove']; print(f'{random.choice(adj)}-{random.choice(noun)}-{random.randint(10,99)}')"
+   ```
+   - Use the output as `{session-id}`
+   - Check `{base-dir}` to ensure no collision (where `{base-dir}` was resolved in step 1); if collision, re-run
 
 3. **Display session banner**:
    ```
@@ -208,6 +209,7 @@ After printing the confirmation, **print the full contents of the new `task-{N+1
    - What are the dependencies between tasks?
    - Each task should be completable in ~15-30 min
    - Start with setup/foundation, then models, then logic, then UI, then integration, then testing
+   - **Extract image references**: Scan the PRD for all markdown image references matching `![...](path)`. Resolve each image path to an **absolute path** relative to the PRD file's directory. When creating each task, associate the relevant images (from the same PRD section the task implements) with that task.
 
 8. **Write each task file** `task-{N}.md`:
    ```markdown
@@ -233,12 +235,17 @@ After printing the confirmation, **print the full contents of the new `task-{N+1
    ## Files to Create/Modify
    - {filepath}: {description of changes}
 
+   ## UI References
+   - {absolute-path-to-image} — {description/context of what the image shows}
+
    ## Estimated Complexity
    {low / medium / high}
 
    ## Status
    ⏳ pending
    ```
+
+   > **Note on UI References**: Only include the `## UI References` section if the task has associated images from the PRD. If a task has no relevant images, omit this section entirely.
 
 9. **Write status.md**:
    ```markdown
@@ -272,6 +279,10 @@ After printing the confirmation, **print the full contents of the new `task-{N+1
     - PRD analyzed: {brief summary of what the PRD describes}
     - Tech stack: {if mentioned in PRD}
     - Key constraints: {if any}
+
+    ### PRD Images
+    - {absolute-path-to-image} — {description/context, e.g. which section it appeared in}
+    - (list all images found in the PRD, or "none" if no images were found)
 
     ### Blockers
     (none)
