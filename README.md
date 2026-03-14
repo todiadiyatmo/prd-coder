@@ -49,6 +49,24 @@ This will:
 - Decompose it into ordered, dependent tasks
 - Save everything to `~/.claude/tasks/vibrant-oak-42/`
 
+### 1a. Custom directory
+
+By default, sessions are stored in `~/.claude/tasks/`. You can specify a custom base directory with `write to`:
+
+```
+/prd-plan /path/to/my-prd.md write to /tmp/
+```
+
+This creates the session at `/tmp/{session-id}/` instead. Reference it by path in all commands:
+
+```
+/prd-execute /tmp/vibrant-oak-42
+/prd-status /tmp/vibrant-oak-42
+/prd-plan /tmp/vibrant-oak-42 add update dockerfile
+```
+
+**Path resolution rule**: If an argument contains `/`, it's treated as a path. If it's a bare name like `vibrant-oak-42`, the default `~/.claude/tasks/` directory is used.
+
 ### 1b. Add tasks to an existing session
 
 ```
@@ -86,8 +104,10 @@ Run this repeatedly across Claude Code sessions. Memory persists.
 
 ## Architecture
 
+Sessions are stored in `~/.claude/tasks/` by default, or in a custom directory specified via `write to`. All commands accept both session-ids (bare names) and full paths.
+
 ```
-~/.claude/tasks/{session-id}/
+{base-dir}/{session-id}/        # base-dir defaults to ~/.claude/tasks
 ├── manifest.md     # Session metadata, PRD path, creation date
 ├── task-1.md       # Individual task with criteria & dependencies
 ├── task-2.md

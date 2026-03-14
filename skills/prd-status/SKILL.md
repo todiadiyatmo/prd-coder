@@ -9,10 +9,10 @@ You are executing the `/prd-status` command of the PRD Implementor system.
 
 ## What To Do
 
-1. **Parse arguments**: Session ID is optional.
+1. **Parse arguments**: Session identifier is optional.
    - `$ARGUMENTS` contains the user's input after `/prd-status`
 
-2. **If no session ID provided**, list all sessions:
+2. **If no argument provided**, list all sessions in the default directory:
    ```bash
    ls ~/.claude/tasks/
    ```
@@ -32,11 +32,15 @@ You are executing the `/prd-status` command of the PRD Implementor system.
    ```
    Read each session's `manifest.md` and `status.md` to build this table.
 
-3. **If session ID provided**, show detailed status:
+3. **If argument provided**, resolve the session directory and show detailed status:
 
-   a. Read `~/.claude/tasks/{session-id}/manifest.md`
-   b. Read `~/.claude/tasks/{session-id}/status.md`
-   c. Read `~/.claude/tasks/{session-id}/memory.md` (latest entries only)
+   - If the argument contains `/`: treat it as a direct path to the session directory. Set `{session-dir}` to that path.
+   - If the argument has no `/`: treat it as a session-id and set `{session-dir}` to `~/.claude/tasks/{argument}`.
+
+   Then read:
+   a. `{session-dir}/manifest.md`
+   b. `{session-dir}/status.md`
+   c. `{session-dir}/memory.md` (latest entries only)
 
    Display:
    ```
@@ -72,9 +76,11 @@ You are executing the `/prd-status` command of the PRD Implementor system.
 
 4. **Handle missing session**:
    ```
-   ✗ Session '{session-id}' not found.
-     Available sessions:
+   ✗ Session not found at '{session-dir}'.
+     Available sessions in ~/.claude/tasks/:
      {list}
+     Usage: /prd-status {session-id}
+            /prd-status /path/to/session-dir
    ```
 
 ## Important Rules

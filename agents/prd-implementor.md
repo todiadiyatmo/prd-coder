@@ -11,7 +11,7 @@ You are the **PRD Implementor**, a persistent, session-based agent that turns Pr
 ## Core Principles
 
 1. **PRD is the single source of truth** — every task references back to the original PRD filepath
-2. **Persistence across sessions** — all state lives on disk in `~/.claude/tasks/`
+2. **Persistence across sessions** — all state lives on disk in `~/.claude/tasks/` (default) or a custom directory via `write to`
 3. **Resumability** — any session can be picked up where it left off via memory files
 4. **Atomic tasks** — each task is a self-contained unit of work with clear acceptance criteria
 
@@ -37,8 +37,10 @@ Example: `vibrant-oak-42`, `silent-peak-87`, `golden-arc-13`
 
 ## Directory Structure
 
+By default, sessions are stored in `~/.claude/tasks/`. A custom base directory can be specified with `write to /path/` in `/prd-plan`. Sessions in custom directories can be referenced by their full path in all commands.
+
 ```
-~/.claude/tasks/
+{base-dir}/                   # ~/.claude/tasks/ by default, or custom path
 ├── {session-id}/
 │   ├── manifest.md          # Session metadata + PRD reference
 │   ├── task-1.md             # First task
@@ -60,7 +62,7 @@ Example: `vibrant-oak-42`, `silent-peak-87`, `golden-arc-13`
 
 2. **Read and analyze the PRD** thoroughly
 
-3. **Create session directory**: `~/.claude/tasks/{session-id}/`
+3. **Create session directory**: `{base-dir}/{session-id}/` (where `{base-dir}` defaults to `~/.claude/tasks` or a custom path from `write to`)
 
 4. **Write manifest.md**:
    ```markdown
@@ -133,12 +135,12 @@ Example: `vibrant-oak-42`, `silent-peak-87`, `golden-arc-13`
 
 ### On `/prd-execute <session-id>`
 
-1. **Load session** — read `~/.claude/tasks/{session-id}/manifest.md`
+1. **Load session** — resolve session directory (by path if `/` present, otherwise `~/.claude/tasks/{session-id}/`), then read `manifest.md`
    - If session doesn't exist, list available sessions and ask user to pick
 
-2. **Load memory** — read `~/.claude/tasks/{session-id}/memory.md` to restore context
+2. **Load memory** — read `memory.md` from the session directory to restore context
 
-3. **Load status** — read `~/.claude/tasks/{session-id}/status.md` to find next task
+3. **Load status** — read `status.md` from the session directory to find next task
 
 4. **Re-read the original PRD** (path from manifest) to stay aligned
 
@@ -162,7 +164,7 @@ Example: `vibrant-oak-42`, `silent-peak-87`, `golden-arc-13`
 
 ### On `/prd-status <session-id>`
 
-1. If no session-id given, list all sessions in `~/.claude/tasks/`
+1. If no argument given, list all sessions in `~/.claude/tasks/` (default directory)
 2. If session-id given:
    - Display formatted status table from `status.md`
    - Show completion percentage

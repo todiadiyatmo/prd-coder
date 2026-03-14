@@ -13,32 +13,40 @@ This command is dual-purpose: it creates new plans from PRD documents **or** app
 
 1. **Detect intent** from `$ARGUMENTS`:
 
-   Parse the first token from `$ARGUMENTS`. Then determine the mode:
+   First, check if `$ARGUMENTS` ends with `write to <path>`. If so, extract that path as `{base-dir}` and remove `write to <path>` from the arguments before further parsing. Otherwise, set `{base-dir}` to `~/.claude/tasks`.
+
+   Parse the first token from the (possibly trimmed) `$ARGUMENTS`. Then determine the mode:
 
    a. **If `$ARGUMENTS` is empty**, show usage and refuse:
       ```
       ✗ Cannot proceed without arguments.
         Usage:
-          /prd-plan /path/to/your-prd.md                — create a new plan
-          /prd-plan {session-id} add {description}       — add task to session
-          /prd-plan /path/to/prd.md add {description}    — add task (find session by PRD path)
+          /prd-plan /path/to/your-prd.md                          — create a new plan
+          /prd-plan /path/to/your-prd.md write to /custom/dir/    — create plan in custom directory
+          /prd-plan {session-id} add {description}                 — add task to session
+          /prd-plan /path/to/session-dir add {description}         — add task (path-based session)
+          /prd-plan /path/to/prd.md add {description}              — add task (find session by PRD path)
       ```
 
-   b. **Check if the first token matches an existing session** — look for `~/.claude/tasks/{first-token}/manifest.md`
-      - If it exists **and there is extra text after the first token** → go to **[Append Mode]** (session resolved by id)
-      - If it exists **and there is no extra text** → show session info (read `status.md`), then ask the user what task they'd like to add. Stop here until the user responds.
+   b. **Check if the first token matches an existing session**:
+      - If the first token contains `/`: check if `{first-token}/manifest.md` exists on disk → it's a path-based session reference. Set `{session-dir}` to `{first-token}`.
+      - If the first token has no `/`: check if `~/.claude/tasks/{first-token}/manifest.md` exists → default directory lookup. Set `{session-dir}` to `~/.claude/tasks/{first-token}`.
+      - If the session exists **and there is extra text after the first token** → go to **[Append Mode]** (session resolved)
+      - If the session exists **and there is no extra text** → show session info (read `status.md`), then ask the user what task they'd like to add. Stop here until the user responds.
 
-   c. **Check if the first token is a filepath that exists on disk**
-      - If the file exists **and there is no extra text** → go to **[Planning Mode]** (step 2 below, existing behavior)
+   c. **Check if the first token is a filepath that exists on disk** (and is a regular file, not a directory)
+      - If the file exists **and there is no extra text** → go to **[Planning Mode]** (step 2 below)
       - If the file exists **and there IS extra text** → go to **[Append Mode]** (resolve session by scanning `~/.claude/tasks/*/manifest.md` for a matching PRD path)
 
    d. **Otherwise** → show error with usage help:
       ```
       ✗ "{first-token}" is not a valid session ID or file path.
         Usage:
-          /prd-plan /path/to/your-prd.md                — create a new plan
-          /prd-plan {session-id} add {description}       — add task to session
-          /prd-plan /path/to/prd.md add {description}    — add task (find session by PRD path)
+          /prd-plan /path/to/your-prd.md                          — create a new plan
+          /prd-plan /path/to/your-prd.md write to /custom/dir/    — create plan in custom directory
+          /prd-plan {session-id} add {description}                 — add task to session
+          /prd-plan /path/to/session-dir add {description}         — add task (path-based session)
+          /prd-plan /path/to/prd.md add {description}              — add task (find session by PRD path)
       ```
 
 ---
@@ -49,7 +57,8 @@ When you reach this mode, you have a session to target and a description of what
 
 ### A1. Resolve the session
 
-- **By session-id**: The session directory is `~/.claude/tasks/{session-id}/`
+- **By path** (first token contains `/`): The session directory is the path itself (already resolved in step 1b as `{session-dir}`)
+- **By session-id** (first token has no `/`): The session directory is `~/.claude/tasks/{session-id}/`
 - **By PRD path**: Scan all `~/.claude/tasks/*/manifest.md` files. Find those whose `PRD:` line matches the given filepath (compare absolute paths).
   - If **no match** found → error: `✗ No session found for PRD: {path}`
   - If **multiple matches** found → list them and ask the user to pick:
@@ -144,14 +153,16 @@ New task:
   {N+1}. {title} (→ {dependencies})
 
 Files updated:
-  - ~/.claude/tasks/{session-id}/task-{N+1}.md
-  - ~/.claude/tasks/{session-id}/status.md
-  - ~/.claude/tasks/{session-id}/manifest.md
-  - ~/.claude/tasks/{session-id}/memory.md
+  - {session-dir}/task-{N+1}.md
+  - {session-dir}/status.md
+  - {session-dir}/manifest.md
+  - {session-dir}/memory.md
 
 Progress: {completed}/{N+1} ({percentage}%)
-Next: /prd-execute {session-id}
+Next: /prd-execute {session-dir-or-session-id}
 ```
+
+Where `{session-dir-or-session-id}` is the full path if the session is in a custom directory, or just the session-id if it's in the default `~/.claude/tasks/` directory.
 
 After printing the confirmation, **print the full contents of the new `task-{N+1}.md` file** using a header like `📄 task-{N+1}.md:` followed by the file content in a fenced code block.
 
@@ -165,7 +176,7 @@ After printing the confirmation, **print the full contents of the new `task-{N+1
    - Adjectives: vibrant, silent, golden, swift, cosmic, amber, lucid, bold, crisp, vivid, radiant, steady, bright, noble, keen, calm, sharp, prime, grand, lush
    - Nouns: oak, fox, wave, peak, arc, elm, ray, orb, gem, spark, reef, tide, dawn, vale, helm, forge, cliff, ridge, mesa, grove
    - Number: random 10-99
-   - Check `~/.claude/tasks/` to ensure no collision
+   - Check `{base-dir}` to ensure no collision (where `{base-dir}` was resolved in step 1)
 
 3. **Display session banner**:
    ```
@@ -179,7 +190,7 @@ After printing the confirmation, **print the full contents of the new `task-{N+1
 
 4. **Read the PRD** file completely
 
-5. **Create directory**: `mkdir -p ~/.claude/tasks/{session-id}`
+5. **Create directory**: `mkdir -p {base-dir}/{session-id}`
 
 6. **Write manifest.md** in the session directory:
    ```markdown
@@ -188,7 +199,9 @@ After printing the confirmation, **print the full contents of the new `task-{N+1
    - Created: {ISO timestamp}
    - Status: planned
    - Total Tasks: {N}
+   - Base Directory: {base-dir}
    ```
+   The `Base Directory` line may be omitted if `{base-dir}` is the default `~/.claude/tasks`.
 
 7. **Decompose into tasks** — think carefully about:
    - What is the logical build order?
@@ -281,16 +294,16 @@ After printing the confirmation, **print the full contents of the new `task-{N+1
       ...
 
     Files Written:
-      - ~/.claude/tasks/{session-id}/manifest.md
-      - ~/.claude/tasks/{session-id}/status.md
-      - ~/.claude/tasks/{session-id}/memory.md
-      - ~/.claude/tasks/{session-id}/task-1.md
-      - ~/.claude/tasks/{session-id}/task-2.md
+      - {base-dir}/{session-id}/manifest.md
+      - {base-dir}/{session-id}/status.md
+      - {base-dir}/{session-id}/memory.md
+      - {base-dir}/{session-id}/task-1.md
+      - {base-dir}/{session-id}/task-2.md
       - ... (list all task files)
 
     Next steps:
-      /prd-execute {session-id}        — execute next task
-      /prd-execute {session-id} -all   — execute all tasks sequentially
+      /prd-execute {session-dir-or-session-id}        — execute next task
+      /prd-execute {session-dir-or-session-id} -all   — execute all tasks sequentially
     ```
 
 ## Important Rules

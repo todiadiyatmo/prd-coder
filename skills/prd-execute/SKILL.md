@@ -9,9 +9,9 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
 
 ## What To Do
 
-1. **Parse arguments**: The user should provide a session ID and optional flags.
+1. **Parse arguments**: The user should provide a session identifier and optional flags.
    - `$ARGUMENTS` contains the user's input after `/prd-execute`
-   - Format: `/prd-execute {session-id} [-all]`
+   - Format: `/prd-execute {session-id-or-path} [-all]`
    - If `-all` flag is present, execute ALL pending tasks sequentially without stopping to ask between tasks (yolo mode)
    - If empty, list available sessions:
      ```bash
@@ -19,13 +19,17 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
      ```
      Then display them and ask the user to pick one.
 
-2. **Validate session exists**: Check `~/.claude/tasks/{session-id}/manifest.md`
+2. **Resolve session directory**:
+   - If the identifier contains `/`: treat it as a direct path to the session directory. Validate that `{path}/manifest.md` exists.
+   - If the identifier has no `/`: treat it as a session-id and look in the default directory. Validate that `~/.claude/tasks/{session-id}/manifest.md` exists.
+   - Set `{session-dir}` to the resolved path. Use `{session-dir}` for all subsequent file reads/writes instead of hardcoded paths.
    - If not found:
      ```
-     ✗ Session '{session-id}' not found.
-       Available sessions:
+     ✗ Session '{session-id-or-path}' not found.
+       Available sessions in ~/.claude/tasks/:
        {list from ~/.claude/tasks/}
        Usage: /prd-execute {session-id}
+              /prd-execute /path/to/session-dir
      ```
 
 3. **Display session banner**:
