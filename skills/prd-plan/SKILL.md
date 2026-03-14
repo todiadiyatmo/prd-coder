@@ -328,7 +328,9 @@ After printing the confirmation, **print the full contents of each new task file
    - What are the dependencies between tasks?
    - Each task should be completable in ~15-30 min
    - Start with setup/foundation, then models, then logic, then UI, then integration, then testing
-   - **Extract image references**: Scan the PRD for all markdown image references matching `![...](path)`. Resolve each image path to an **absolute path** relative to the PRD file's directory. When creating each task, associate the relevant images (from the same PRD section the task implements) with that task.
+   - **Extract image references**: Scan the PRD for all markdown image references matching `![...](path)` or `![...](<path>)`. Keep image paths as **relative paths** (relative to the PRD file's directory). When creating each task, associate the relevant images (from the same PRD section the task implements) with that task.
+
+   Write the image in the task using this format `![...](<path>)` for best compability with markdown editors
 
 8. **Write each task file** `task-{N}.md`:
    ```markdown
@@ -355,7 +357,7 @@ After printing the confirmation, **print the full contents of each new task file
    - {filepath}: {description of changes}
 
    ## UI References
-   - {absolute-path-to-image} — {description/context of what the image shows}
+   ![{description}](<{relative-path-to-image}>)
 
    ## Estimated Complexity
    {low / medium / high}
