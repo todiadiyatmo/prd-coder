@@ -1,13 +1,13 @@
 ---
 name: prd-plan
-description: Plan implementation tasks from a PRD document, or add new tasks to an existing session. Provide a PRD filepath to create a new plan, or a session-id/PRD-path plus a description to append tasks.
+description: Plan implementation tasks from a PRD document, update an existing session's plan, or add new tasks to an existing session. Provide a PRD filepath to create a new plan (or update an existing one), or a session-id/PRD-path plus a description to append tasks.
 ---
 
 # /prd-plan — PRD Planning Command
 
 You are executing the `/prd-plan` command of the PRD Implementor system.
 
-This command is dual-purpose: it creates new plans from PRD documents **or** appends new tasks to existing sessions.
+This command is multi-purpose: it creates new plans from PRD documents, **updates** existing session plans, **or** appends new tasks to existing sessions.
 
 ## What To Do
 
@@ -21,7 +21,7 @@ This command is dual-purpose: it creates new plans from PRD documents **or** app
       ```
       ✗ Cannot proceed without arguments.
         Usage:
-          /prd-plan /path/to/your-prd.md                          — create a new plan
+          /prd-plan /path/to/your-prd.md                          — create new plan (or update existing)
           /prd-plan /path/to/your-prd.md write to /custom/dir/    — create plan in custom directory
           /prd-plan {session-id} add {description}                 — add task to session
           /prd-plan /path/to/session-dir add {description}         — add task (path-based session)
@@ -35,14 +35,27 @@ This command is dual-purpose: it creates new plans from PRD documents **or** app
       - If the session exists **and there is no extra text** → show session info (read `status.md`), then ask the user what task they'd like to add. Stop here until the user responds.
 
    c. **Check if the first token is a filepath that exists on disk** (and is a regular file, not a directory)
-      - If the file exists **and there is no extra text** → go to **[Planning Mode]** (step 2 below)
-      - If the file exists **and there IS extra text** → go to **[Append Mode]** (resolve session by scanning `~/.claude/tasks/*/manifest.md` for a matching PRD path)
+      - If the file exists **and there IS extra text** → go to **[Append Mode]** (resolve session by scanning `{base-dir}/*/manifest.md` for a matching PRD path)
+      - If the file exists **and there is no extra text** → check for existing sessions before planning:
+        - Scan `{base-dir}/*/manifest.md` for any session whose `PRD:` line matches the given filepath (compare absolute paths)
+        - If **one or more matches found** → present the user with a choice:
+          ```
+          Existing session(s) found for this PRD:
+            1. {session-id} ({base-dir}/{session-id}/) — {X}/{N} tasks complete
+            2. (create new session)
+
+          Update existing session or create new? (enter number)
+          ```
+          Stop here until the user responds.
+          - If user picks an existing session → go to **[Update Mode]**
+          - If user picks "create new" → go to **[Planning Mode]** (step 2 below)
+        - If **no matches** → go to **[Planning Mode]** (step 2 below)
 
    d. **Otherwise** → show error with usage help:
       ```
       ✗ "{first-token}" is not a valid session ID or file path.
         Usage:
-          /prd-plan /path/to/your-prd.md                          — create a new plan
+          /prd-plan /path/to/your-prd.md                          — create new plan (or update existing)
           /prd-plan /path/to/your-prd.md write to /custom/dir/    — create plan in custom directory
           /prd-plan {session-id} add {description}                 — add task to session
           /prd-plan /path/to/session-dir add {description}         — add task (path-based session)
@@ -165,6 +178,112 @@ Next: /prd-execute {session-dir-or-session-id}
 Where `{session-dir-or-session-id}` is the full path if the session is in a custom directory, or just the session-id if it's in the default `~/.claude/tasks/` directory.
 
 After printing the confirmation, **print the full contents of the new `task-{N+1}.md` file** using a header like `📄 task-{N+1}.md:` followed by the file content in a fenced code block.
+
+**Stop here — do not continue to Update Mode or Planning Mode.**
+
+---
+
+## [Update Mode] — Re-plan tasks in an existing session
+
+When you reach this mode, you have a resolved `{session-dir}` and the PRD filepath.
+
+### U1. Load full context
+
+Read all files in the session directory:
+- `manifest.md` — session metadata
+- `status.md` — current progress and task table
+- `memory.md` — past decisions and context
+- All `task-*.md` files — full task details
+
+Categorize each task by status: `✅ done`, `⏳ pending`, `🔄 in-progress`, `❌ failed`.
+
+### U2. Collect focus instructions
+
+Ask the user:
+```
+What should the updated plan focus on? (or press enter to re-plan all pending tasks)
+```
+Stop here until the user responds. The user can provide specific instructions (e.g., "focus on PG-012, PG-013, seeder data") or press enter to re-plan all pending tasks.
+
+### U3. Re-read the PRD
+
+Read the original PRD file completely (same as Planning Mode step 4) to catch any changes since the original plan was created.
+
+### U4. Preserve completed work
+
+- Tasks with status `✅ done` are **never modified or deleted**
+- Tasks with status `🔄 in-progress` are preserved by default. If the user's focus instructions conflict with an in-progress task, warn the user and ask for confirmation before modifying it.
+
+### U5. Regenerate pending tasks
+
+- Delete all `⏳ pending` task files from the session directory
+- Re-decompose the PRD (guided by the user's focus instructions) into new tasks
+- New tasks are numbered starting from the highest existing task number + 1 (across all preserved tasks)
+- Apply the same planning rules as Planning Mode: dependency order, ~15-30 min chunks, image extraction
+- Reference completed tasks as satisfied dependencies where relevant
+
+### U6. Update session files
+
+**Update `status.md`:**
+- Rebuild the task table with all preserved tasks (done, in-progress, failed) plus the new tasks
+- Update the `Progress:` line with new counts
+- Update `Last Updated:` timestamp
+
+**Update `manifest.md`:**
+- Update the `Total Tasks:` count to reflect the new total
+
+**Append to `memory.md`:**
+```markdown
+---
+## [Plan Update - {ISO timestamp}]
+
+### User Focus
+{the user's focus instructions, verbatim — or "Re-plan all pending tasks" if no specific focus}
+
+### Tasks Preserved
+- Task {N}: {title} (✅ done)
+- ...
+
+### Tasks Removed
+- Task {N}: {title} (was ⏳ pending — replaced)
+- ...
+
+### Tasks Added
+- Task {N}: {title} (depends on: {deps})
+- ...
+
+### Notes
+- {context about why the plan was updated}
+```
+
+### U7. Display confirmation
+
+```
+✓ Session {session-id} updated!
+
+Preserved: {X} completed tasks
+Removed:   {Y} pending tasks
+Added:     {Z} new tasks
+Total:     {T} tasks ({X}/{T} complete)
+
+Updated task overview:
+  1. ✅ {title}
+  ...
+  N. ⏳ {title} (→ deps)
+
+Files updated:
+  - {session-dir}/status.md
+  - {session-dir}/manifest.md
+  - {session-dir}/memory.md
+  - {session-dir}/task-{N+1}.md
+  - ...
+
+Next: /prd-execute {session-dir-or-session-id}
+```
+
+Where `{session-dir-or-session-id}` is the full path if the session is in a custom directory, or just the session-id if it's in the default `~/.claude/tasks/` directory.
+
+After printing the confirmation, **print the full contents of each new task file** using a header like `📄 task-{N}.md:` followed by the file content in a fenced code block.
 
 **Stop here — do not continue to Planning Mode.**
 
@@ -321,6 +440,8 @@ After printing the confirmation, **print the full contents of the new `task-{N+1
 
 - In **Planning Mode**, the PRD filepath is **mandatory** — never proceed without it
 - In **Append Mode**, the session must be resolvable (by session-id or PRD path)
+- In **Update Mode**, completed tasks (`✅ done`) are **never modified or deleted**
+- When updating, always re-read the original PRD to catch any changes
 - Always use **absolute paths** when storing the PRD reference
 - Every task file must reference the original PRD location
 - Tasks should be ordered so dependencies flow forward (task-3 can depend on task-1 but not on task-5)
