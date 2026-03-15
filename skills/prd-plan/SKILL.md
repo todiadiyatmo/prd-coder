@@ -230,6 +230,7 @@ Read the original PRD file completely (same as Planning Mode step 4) to catch an
 **Update `status.md`:**
 - Rebuild the task table with all preserved tasks (done, in-progress, failed) plus the new tasks
 - Rebuild the `## Database Schema` table based on the new task set (if applicable)
+- Rebuild the `## Mockup References` table based on the new task set (if applicable)
 - Update the `Progress:` line with new counts
 - Update `Last Updated:` timestamp
 
@@ -397,9 +398,17 @@ After printing the confirmation, **print the full contents of each new task file
    | Table | Created In | Status | Notes |
    |-------|-----------|--------|-------|
    | {table_name} | task-{N} | ⏳ pending | {brief description} |
+
+   ## Mockup References
+
+   | Mockup Link | Status | Notes |
+   |-------------|--------|-------|
+   | {image_path} | ⏳ pending | Used in task-{N}: {brief description} |
    ```
 
    > **Note on Database Schema**: Only include the `## Database Schema` section in status.md if the PRD contains database tables. Status mirrors the task that creates the table (⏳ pending, ✅ done, etc.). Tables only referenced (not created) are excluded from this table.
+
+   > **Note on Mockup References**: Only include `## Mockup References` if the PRD contains image references. Status: `⏳ pending` → `✅ done` (when the task referencing the mockup is completed) or `❌ cancel` (mockup determined not relevant). If a mockup is referenced by multiple tasks, mark it done only when all referencing tasks are complete.
 
 10. **Write memory.md**:
     ```markdown

@@ -34,6 +34,8 @@ You are executing the `/prd-status` command of the PRD Implementor system.
 
    > **Note on Database Schema**: When displaying detailed status (step 3), read the `## Database Schema` section from `status.md` to populate the Database Schema table. Only display this section if it exists in status.md.
 
+   > **Note on Mockup References**: When displaying detailed status (step 3), read the `## Mockup References` section from `status.md` to populate the Mockup References table. Only display this section if it exists in status.md.
+
 3. **If argument provided**, resolve the session directory and show detailed status:
 
    - If the argument contains `/`: treat it as a direct path to the session directory. Set `{session-dir}` to that path.
@@ -72,6 +74,14 @@ You are executing the `/prd-status` command of the PRD Implementor system.
    │ users                │ task-1     │ ✅ done    │ Auth tables      │
    │ items                │ task-3     │ ⏳ pending │ Core inventory   │
    └──────────────────────┴────────────┴───────────┴──────────────────┘
+
+   Mockup References:
+   ┌──────────────────────────────────┬───────────┬──────────────────────────┐
+   │ Mockup Link                      │ Status    │ Notes                    │
+   ├──────────────────────────────────┼───────────┼──────────────────────────┤
+   │ ../assets/login-screen.png       │ ✅ done    │ task-3: Login page UI    │
+   │ ../assets/dashboard.png          │ ⏳ pending │ task-5: Dashboard layout │
+   └──────────────────────────────────┴───────────┴──────────────────────────┘
 
    Current Task: 3 — API endpoints
    Next Up:      4 — Frontend components

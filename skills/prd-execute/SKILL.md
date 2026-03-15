@@ -86,6 +86,8 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
        ```
        Also update the `## Database Schema` table in status.md — change the status of any tables created by the completed task from ⏳ pending to ✅ done.
 
+       Also update `## Mockup References` table in status.md — change mockups referenced by the completed task from `⏳ pending` to `✅ done`. If a mockup is referenced by multiple tasks, only mark it done when all referencing tasks are complete.
+
     c. **Append to memory.md** — NEVER overwrite, always append:
        ```markdown
        ---
