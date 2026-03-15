@@ -332,10 +332,10 @@ After printing the confirmation, **print the full contents of each new task file
    - What are the dependencies between tasks?
    - Each task should be completable in ~15-30 min
    - Start with setup/foundation, then models, then logic, then UI, then integration, then testing
-   - **Extract image references**: Scan the PRD for all markdown image references matching `![...](path)` or `![...](<path>)`. Keep image paths as **relative paths** (relative to the PRD file's directory). When creating each task, associate the relevant images (from the same PRD section the task implements) with that task.
+   - **Extract image references**: Scan the PRD for all markdown image references matching `![...](path)` or `![...](<path>)`. First resolve each image path to an **absolute path** (by resolving it relative to the PRD file's directory). Then, when writing the image into a task file, convert the absolute path to a **relative path from the task file's directory** (the session directory, e.g. `~/.claude/tasks/{session-id}/`). This ensures images render correctly when viewed from the task file's location. When creating each task, associate the relevant images (from the same PRD section the task implements) with that task.
    - **Extract database schema**: Scan the PRD for database schema definitions (tables, models, entities). Collect all table/model names and their associated fields. If no database schema section is found in the PRD, warn the user: `⚠️  No database schema found in PRD. Consider adding a schema section or run a schema generation tool before planning.`
 
-   Write the image in the task using this format `![...](<path>)` for best compability with markdown editors
+   Write the image in the task using this format `![...](<path>)` for best compatibility with markdown editors. The `path` must be relative to the task file's directory — use Python `os.path.relpath(absolute_image_path, task_dir)` mentally to compute the correct relative path.
 
 8. **Write each task file** `task-{N}.md`:
    ```markdown
@@ -365,7 +365,7 @@ After printing the confirmation, **print the full contents of each new task file
    - `{table_name}`: {brief role, e.g. "created in this task" or "read/queried" or "modified (add column)"}
 
    ## UI References
-   ![{description}](<{relative-path-to-image}>)
+   ![{description}](<{relative-path-to-image-from-task-dir}>)
 
    ## Estimated Complexity
    {low / medium / high}
