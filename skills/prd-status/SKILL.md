@@ -32,6 +32,8 @@ You are executing the `/prd-status` command of the PRD Implementor system.
    ```
    Read each session's `manifest.md` and `status.md` to build this table.
 
+   > **Note on Database Schema**: When displaying detailed status (step 3), read the `## Database Schema` section from `status.md` to populate the Database Schema table. Only display this section if it exists in status.md.
+
 3. **If argument provided**, resolve the session directory and show detailed status:
 
    - If the argument contains `/`: treat it as a direct path to the session directory. Set `{session-dir}` to that path.
@@ -62,6 +64,14 @@ You are executing the `/prd-status` command of the PRD Implementor system.
    │ 4 │ Frontend components    │ ⏳ pending │ task-2       │
    │ 5 │ Integration            │ ⏳ pending │ task-3,4     │
    └───┴────────────────────────┴───────────┴──────────────┘
+
+   Database Schema:
+   ┌──────────────────────┬────────────┬───────────┬──────────────────┐
+   │ Table                │ Created In │ Status    │ Notes            │
+   ├──────────────────────┼────────────┼───────────┼──────────────────┤
+   │ users                │ task-1     │ ✅ done    │ Auth tables      │
+   │ items                │ task-3     │ ⏳ pending │ Core inventory   │
+   └──────────────────────┴────────────┴───────────┴──────────────────┘
 
    Current Task: 3 — API endpoints
    Next Up:      4 — Frontend components

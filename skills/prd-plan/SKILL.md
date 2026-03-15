@@ -121,6 +121,9 @@ Section: {relevant section, or "Added post-planning" if not from original PRD}
 ## Files to Create/Modify
 - {filepath}: {description of changes}
 
+## Database Tables
+- `{table_name}`: {brief role, e.g. "created in this task" or "read/queried" or "modified (add column)"}
+
 ## Estimated Complexity
 {low / medium / high}
 
@@ -226,6 +229,7 @@ Read the original PRD file completely (same as Planning Mode step 4) to catch an
 
 **Update `status.md`:**
 - Rebuild the task table with all preserved tasks (done, in-progress, failed) plus the new tasks
+- Rebuild the `## Database Schema` table based on the new task set (if applicable)
 - Update the `Progress:` line with new counts
 - Update `Last Updated:` timestamp
 
@@ -329,6 +333,7 @@ After printing the confirmation, **print the full contents of each new task file
    - Each task should be completable in ~15-30 min
    - Start with setup/foundation, then models, then logic, then UI, then integration, then testing
    - **Extract image references**: Scan the PRD for all markdown image references matching `![...](path)` or `![...](<path>)`. Keep image paths as **relative paths** (relative to the PRD file's directory). When creating each task, associate the relevant images (from the same PRD section the task implements) with that task.
+   - **Extract database schema**: Scan the PRD for database schema definitions (tables, models, entities). Collect all table/model names and their associated fields. If no database schema section is found in the PRD, warn the user: `⚠️  No database schema found in PRD. Consider adding a schema section or run a schema generation tool before planning.`
 
    Write the image in the task using this format `![...](<path>)` for best compability with markdown editors
 
@@ -356,6 +361,9 @@ After printing the confirmation, **print the full contents of each new task file
    ## Files to Create/Modify
    - {filepath}: {description of changes}
 
+   ## Database Tables
+   - `{table_name}`: {brief role, e.g. "created in this task" or "read/queried" or "modified (add column)"}
+
    ## UI References
    ![{description}](<{relative-path-to-image}>)
 
@@ -367,6 +375,8 @@ After printing the confirmation, **print the full contents of each new task file
    ```
 
    > **Note on UI References**: Only include the `## UI References` section if the task has associated images from the PRD. If a task has no relevant images, omit this section entirely.
+
+   > **Note on Database Tables**: Only include the `## Database Tables` section if the task involves database tables (creating, reading, or modifying). Omit if not applicable.
 
 9. **Write status.md**:
    ```markdown
@@ -381,7 +391,15 @@ After printing the confirmation, **print the full contents of each new task file
    |---|------|--------|------------|------------|
    | 1 | {title} | ⏳ pending | none | {low/med/high} |
    | 2 | {title} | ⏳ pending | task-1 | {low/med/high} |
+
+   ## Database Schema
+
+   | Table | Created In | Status | Notes |
+   |-------|-----------|--------|-------|
+   | {table_name} | task-{N} | ⏳ pending | {brief description} |
    ```
+
+   > **Note on Database Schema**: Only include the `## Database Schema` section in status.md if the PRD contains database tables. Status mirrors the task that creates the table (⏳ pending, ✅ done, etc.). Tables only referenced (not created) are excluded from this table.
 
 10. **Write memory.md**:
     ```markdown
