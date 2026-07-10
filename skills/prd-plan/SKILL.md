@@ -198,7 +198,7 @@ Read all files in the session directory:
 - `memory.md` — past decisions and context
 - All `task-*.md` files — full task details
 
-Categorize each task by status: `✅ done`, `⏳ pending`, `🔄 in-progress`, `❌ failed`.
+Categorize each task by status: `✅ done`, `⏳ pending`, `🔄 in-progress`, `🔁 retry`, `❌ blocked`.
 
 ### U2. Collect focus instructions
 
@@ -228,7 +228,7 @@ Read the original PRD file completely (same as Planning Mode step 4) to catch an
 ### U6. Update session files
 
 **Update `status.md`:**
-- Rebuild the task table with all preserved tasks (done, in-progress, failed) plus the new tasks
+- Rebuild the task table with all preserved tasks (done, in-progress, retry, blocked) plus the new tasks
 - Rebuild the `## Database Schema` table based on the new task set (if applicable)
 - Rebuild the `## Mockup References` table based on the new task set (if applicable)
 - Update the `Progress:` line with new counts

@@ -48,14 +48,17 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
 
 5. **Find next task** — priority order:
    a. Tasks marked `🔁 retry` (failed previously, try again)
-   b. Tasks marked `⏳ pending` whose dependencies are all `✅ done`
-   c. If all tasks are done or blocked, report completion
+   b. Stale tasks marked `🔄 in-progress` whose dependencies are all `✅ done`
+   c. Tasks marked `⏳ pending` whose dependencies are all `✅ done`
+   d. If all tasks are done or blocked, report completion
+
+   A `🔄 in-progress` task is stale when a previous `/prd-execute` run started it but stopped before marking it `✅ done`. Resume stale in-progress tasks before selecting a new pending task, and record the resume in `memory.md`.
 
 6. **Display what you're about to do**:
    ```
    ─────────────────────────────────────────
    Executing Task {N}: {title}
-   Status: {⏳ pending / 🔁 retry}
+   Status: {⏳ pending / 🔄 in-progress / 🔁 retry}
    Dependencies: {list, all ✅}
    Session ID: {session-id}
    ─────────────────────────────────────────
@@ -65,14 +68,42 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
 
 8. **Re-read relevant memory entries** — look for notes from previous tasks that affect this one
 
-9. **Execute the task**:
+9. **Mark the task as in-progress before implementation**:
+
+   a. **Update task-{N}.md** — set status:
+      ```markdown
+      ## Status
+      🔄 in-progress — started {timestamp}
+      ```
+
+   b. **Update status.md** — change the task row from `⏳ pending` or `🔁 retry` to `🔄 in-progress`. If the selected task was already stale `🔄 in-progress`, leave it as `🔄 in-progress`.
+
+      Do **not** increment the progress counter at this step. Progress only changes when a task is marked `✅ done`.
+
+   c. **If resuming a stale in-progress task**, append a short note to `memory.md` before implementation:
+      ```markdown
+      ---
+
+      ## [Task {N} Resumed - {timestamp}]
+
+      - Resuming stale `🔄 in-progress` task from a previous interrupted execution.
+      ```
+
+   d. **Print the updated session files before implementation begins**:
+      - Print the full updated `task-{N}.md`
+      - Print the full updated `status.md`
+      - If `memory.md` was updated for a stale resume, print the full updated `memory.md`
+
+      Use a header like `📄 {filename}:` followed by the file content in a fenced code block.
+
+10. **Execute the task**:
    - Implement the code, create files, make changes as described
    - Follow the acceptance criteria precisely
    - Reference the PRD when making decisions
    - If you need to deviate from the plan, document WHY
    - If UI References are present, the implementation MUST match the layout, spacing, and component arrangement shown in the reference images. Use the Read tool to view image files.
 
-10. **After completion, update files**:
+11. **After completion, update files**:
 
     a. **Update task-{N}.md** — check off acceptance criteria, set status:
        ```markdown
@@ -80,7 +111,7 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
        ✅ done — completed {timestamp}
        ```
 
-    b. **Update status.md** — change task row and update progress counter:
+    b. **Update status.md** — change task row from `🔄 in-progress` to `✅ done` and update progress counter:
        ```markdown
        ## Progress: {X}/{N} tasks complete ({percentage}%)
        ```
@@ -111,7 +142,7 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
        - {e.g., "created a shared util in src/utils/helpers.ts — task-4 should import from there"}
        ```
 
-11. **Report results**:
+12. **Report results**:
     ```
     ✓ Task {N} complete: {title}
 
@@ -123,7 +154,7 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
     Run: /prd-execute {session-id} -all  (execute all remaining)
     ```
 
-12. **Continue or ask**:
+13. **Continue or ask**:
     - If `-all` flag was set: automatically loop back to step 5 and execute the next available task. Continue until all tasks are done or a task fails with `❌ blocked`.
     - Otherwise: ask if the user wants to continue to the next task
 
@@ -131,7 +162,7 @@ You are executing the `/prd-execute` command of the PRD Implementor system.
 
 If a task fails during execution:
 
-1. Mark in status.md as `🔁 retry` (first failure) or `❌ blocked` (second failure)
+1. If the task is `🔄 in-progress`, mark it in `status.md` as `🔁 retry` on first failure or `❌ blocked` on repeated failure. Update `task-{N}.md` to the same terminal failure status.
 2. Log the failure details in memory.md:
    ```markdown
    ---

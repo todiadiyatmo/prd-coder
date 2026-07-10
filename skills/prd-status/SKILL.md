@@ -62,7 +62,7 @@ You are executing the `/prd-status` command of the PRD Implementor system.
    ├───┼────────────────────────┼───────────┼──────────────┤
    │ 1 │ Project setup          │ ✅ done    │ none         │
    │ 2 │ Data models            │ ✅ done    │ task-1       │
-   │ 3 │ API endpoints          │ 🔄 current │ task-2       │
+   │ 3 │ API endpoints          │ 🔄 in-progress │ task-2       │
    │ 4 │ Frontend components    │ ⏳ pending │ task-2       │
    │ 5 │ Integration            │ ⏳ pending │ task-3,4     │
    └───┴────────────────────────┴───────────┴──────────────┘

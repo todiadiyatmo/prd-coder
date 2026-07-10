@@ -3,7 +3,7 @@ set -e
 
 # ═══════════════════════════════════════════════════
 #  PRD Implementor — Installer
-#  Installs agent, skills, and commands for Claude Code
+#  Installs agent and skills for Claude Code and Codex
 # ═══════════════════════════════════════════════════
 
 BLUE='\033[0;34m'
@@ -27,6 +27,8 @@ CLAUDE_DIR="$HOME/.claude"
 AGENTS_DIR="$CLAUDE_DIR/agents"
 SKILLS_DIR="$CLAUDE_DIR/skills"
 TASKS_DIR="$CLAUDE_DIR/tasks"
+CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
+CODEX_SKILLS_DIR="$CODEX_DIR/skills"
 
 # Create directories
 echo -e "${ARROW} Creating directories..."
@@ -35,6 +37,9 @@ mkdir -p "$SKILLS_DIR/prd-plan"
 mkdir -p "$SKILLS_DIR/prd-execute"
 mkdir -p "$SKILLS_DIR/prd-status"
 mkdir -p "$TASKS_DIR"
+mkdir -p "$CODEX_SKILLS_DIR/prd-plan"
+mkdir -p "$CODEX_SKILLS_DIR/prd-execute"
+mkdir -p "$CODEX_SKILLS_DIR/prd-status"
 echo -e "  ${GREEN}${CHECK}${NC} Directories ready"
 
 # Install agent
@@ -53,21 +58,38 @@ echo -e "  ${GREEN}${CHECK}${NC} Skill: /prd-execute"
 cp "$SCRIPT_DIR/skills/prd-status/SKILL.md" "$SKILLS_DIR/prd-status/SKILL.md"
 echo -e "  ${GREEN}${CHECK}${NC} Skill: /prd-status"
 
+# Install Codex skills
+echo -e "${ARROW} Installing Codex skills..."
+cp "$SCRIPT_DIR/skills/prd-plan/SKILL.md" "$CODEX_SKILLS_DIR/prd-plan/SKILL.md"
+echo -e "  ${GREEN}${CHECK}${NC} Codex skill: prd-plan"
+
+cp "$SCRIPT_DIR/skills/prd-execute/SKILL.md" "$CODEX_SKILLS_DIR/prd-execute/SKILL.md"
+echo -e "  ${GREEN}${CHECK}${NC} Codex skill: prd-execute"
+
+cp "$SCRIPT_DIR/skills/prd-status/SKILL.md" "$CODEX_SKILLS_DIR/prd-status/SKILL.md"
+echo -e "  ${GREEN}${CHECK}${NC} Codex skill: prd-status"
+
 # Summary
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════${NC}"
 echo -e "${GREEN}  Installation complete!${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════${NC}"
 echo ""
-echo "  Installed to: $CLAUDE_DIR"
+echo "  Installed Claude files to: $CLAUDE_DIR"
+echo "  Installed Codex skills to: $CODEX_SKILLS_DIR"
 echo ""
-echo "  Files:"
+echo "  Claude files:"
 echo "    $AGENTS_DIR/prd-implementor.md"
 echo "    $SKILLS_DIR/prd-plan/SKILL.md"
 echo "    $SKILLS_DIR/prd-execute/SKILL.md"
 echo "    $SKILLS_DIR/prd-status/SKILL.md"
 echo ""
-echo "  Usage:"
+echo "  Codex files:"
+echo "    $CODEX_SKILLS_DIR/prd-plan/SKILL.md"
+echo "    $CODEX_SKILLS_DIR/prd-execute/SKILL.md"
+echo "    $CODEX_SKILLS_DIR/prd-status/SKILL.md"
+echo ""
+echo "  Claude Code usage:"
 echo -e "    ${YELLOW}/prd-plan /path/to/prd.md${NC}                — Plan tasks from a PRD"
 echo -e "    ${YELLOW}/prd-plan /path/to/prd.md write to /tmp/${NC} — Plan to a custom directory"
 echo -e "    ${YELLOW}/prd-execute session-id${NC}                   — Execute next task"
@@ -75,6 +97,11 @@ echo -e "    ${YELLOW}/prd-execute /tmp/session-id${NC}              — Execute
 echo -e "    ${YELLOW}/prd-status${NC}                               — Check all sessions"
 echo -e "    ${YELLOW}/prd-status session-id${NC}                    — Check specific session"
 echo -e "    ${YELLOW}/prd-status /tmp/session-id${NC}               — Check session at custom path"
+echo ""
+echo "  Codex usage:"
+echo -e "    ${YELLOW}\$prd-plan /path/to/prd.md${NC}                — Plan tasks from a PRD"
+echo -e "    ${YELLOW}\$prd-execute session-id${NC}                   — Execute next task"
+echo -e "    ${YELLOW}\$prd-status session-id${NC}                    — Check specific session"
 echo ""
 echo "  Tasks are stored in: $TASKS_DIR"
 echo ""

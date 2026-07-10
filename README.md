@@ -1,6 +1,6 @@
 # PRD Implementor
 
-A persistent, session-based agent for Claude Code that turns Product Requirements Documents into executed code through structured planning and iterative execution.
+A persistent, session-based agent for Claude Code and Codex that turns Product Requirements Documents into executed code through structured planning and iterative execution.
 
 ## The Problem
 
@@ -8,7 +8,7 @@ Claude Code loses context between sessions. If you're implementing a complex PRD
 
 ## The Solution
 
-PRD Implementor gives Claude Code **persistent memory on disk**. It:
+PRD Implementor gives Claude Code and Codex **persistent memory on disk**. It:
 
 1. Reads your PRD and decomposes it into sequenced, dependent tasks
 2. Stores everything in `~/.claude/tasks/{session-id}/`
@@ -20,6 +20,10 @@ PRD Implementor gives Claude Code **persistent memory on disk**. It:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/todiadiyatmo/prd-coder/main/bootstrap.sh | bash -s -- install
 ```
+
+The installer supports both Claude Code and Codex. Claude files are installed under `~/.claude/`, and Codex skills are installed under `${CODEX_HOME:-~/.codex}/skills`.
+
+Claude Code uses slash commands such as `/prd-plan`. Codex loads these as skills, so invoke them by skill name, for example `$prd-plan /path/to/my-prd.md` or "Use prd-plan on /path/to/my-prd.md".
 
 ### Manual install
 
@@ -33,8 +37,14 @@ cd prd-coder
 
 ### 1. Plan from a PRD
 
+Claude Code:
 ```
 /prd-plan /path/to/my-prd.md
+```
+
+Codex:
+```
+$prd-plan /path/to/my-prd.md
 ```
 
 This will:
@@ -47,25 +57,46 @@ This will:
 
 By default, sessions are stored in `~/.claude/tasks/`. You can specify a custom base directory with `write to`:
 
+Claude Code:
 ```
 /prd-plan /path/to/my-prd.md write to /tmp/
 ```
 
+Codex:
+```
+$prd-plan /path/to/my-prd.md write to /tmp/
+```
+
 This creates the session at `/tmp/{session-id}/` instead. Reference it by path in all commands:
 
+Claude Code:
 ```
 /prd-execute /tmp/vibrant-oak-42
 /prd-status /tmp/vibrant-oak-42
 /prd-plan /tmp/vibrant-oak-42 add update dockerfile
 ```
 
+Codex:
+```
+$prd-execute /tmp/vibrant-oak-42
+$prd-status /tmp/vibrant-oak-42
+$prd-plan /tmp/vibrant-oak-42 add update dockerfile
+```
+
 **Path resolution rule**: If an argument contains `/`, it's treated as a path. If it's a bare name like `vibrant-oak-42`, the default `~/.claude/tasks/` directory is used.
 
 ### 1b. Add tasks to an existing session
 
+Claude Code:
 ```
 /prd-plan vibrant-oak-42 add set up docker compose for dev
 /prd-plan /path/to/my-prd.md add integration tests for auth
+```
+
+Codex:
+```
+$prd-plan vibrant-oak-42 add set up docker compose for dev
+$prd-plan /path/to/my-prd.md add integration tests for auth
 ```
 
 This will:
@@ -76,14 +107,21 @@ This will:
 
 ### 2. Execute tasks
 
+Claude Code:
 ```
 /prd-execute vibrant-oak-42
+```
+
+Codex:
+```
+$prd-execute vibrant-oak-42
 ```
 
 This will:
 - Load the session's memory (context from previous runs)
 - Re-read the original PRD
 - Find the next actionable task
+- Mark it `🔄 in-progress` before implementation begins
 - Implement it
 - Update status and memory
 
@@ -91,9 +129,16 @@ Run this repeatedly across Claude Code sessions. Memory persists.
 
 ### 3. Check status
 
+Claude Code:
 ```
 /prd-status                    # list all sessions
 /prd-status vibrant-oak-42     # detailed status for a session
+```
+
+Codex:
+```
+$prd-status                    # list all sessions
+$prd-status vibrant-oak-42     # detailed status for a session
 ```
 
 ## Architecture

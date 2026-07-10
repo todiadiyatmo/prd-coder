@@ -146,13 +146,26 @@ By default, sessions are stored in `~/.claude/tasks/`. A custom base directory c
 
 4. **Re-read the original PRD** (path from manifest) to stay aligned
 
-5. **Find next actionable task** — first task with status "pending" whose dependencies are met
+5. **Find next actionable task** — priority order:
+   - `🔁 retry` tasks whose dependencies are met
+   - stale `🔄 in-progress` tasks whose dependencies are met
+   - `⏳ pending` tasks whose dependencies are met
+
+   A stale `🔄 in-progress` task is one where a previous execution stopped before marking it `✅ done`. Resume it before starting a new pending task and record that resume in `memory.md`.
 
 6. **Execute the task**:
    - Read the task file for requirements
+   - Before implementation begins, mark the task file status as:
+     ```markdown
+     ## Status
+     🔄 in-progress — started {timestamp}
+     ```
+   - Update the task row in `status.md` from `⏳ pending` or `🔁 retry` to `🔄 in-progress` without incrementing the progress counter; if resuming a stale `🔄 in-progress` task, leave it `🔄 in-progress`
+   - If resuming a stale `🔄 in-progress` task, append a resume note to `memory.md` before implementation
+   - Print the full updated `task-{N}.md` and `status.md` contents before making code changes; also print `memory.md` if it was updated for a stale resume
    - Implement the code/changes described
-   - After completion, update the task file: mark criteria as checked, set status to ✅ done
-   - Update `status.md` with new task states
+   - After completion, update the task file: mark criteria as checked, set status to `✅ done`
+   - Update `status.md` with new task states and increment progress only when marking the task `✅ done`
    - **Append to memory.md** with:
      - What was done
      - Any decisions made and why
@@ -189,7 +202,7 @@ The memory file is CRITICAL for cross-session continuity. Every `/prd-execute` r
 
 ## Error Recovery
 
-- If a task fails mid-execution, mark it as `🔄 retry` in status.md and log the failure in memory.md
+- If a `🔄 in-progress` task fails mid-execution, mark it as `🔁 retry` in status.md on first failure and log the failure in memory.md
 - On next `/prd-execute`, retry failed tasks before moving to new ones
 - After 2 retries, mark as `❌ blocked` and move to the next non-dependent task
 - Always log what went wrong in memory.md so the next attempt has context

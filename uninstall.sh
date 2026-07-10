@@ -14,6 +14,7 @@ echo -e "${BLUE}═════════════════════�
 echo ""
 
 CLAUDE_DIR="$HOME/.claude"
+CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
 
 # Check for existing task data
 if [ -d "$CLAUDE_DIR/tasks" ] && [ "$(ls -A "$CLAUDE_DIR/tasks" 2>/dev/null)" ]; then
@@ -38,6 +39,11 @@ fi
 # Remove skills
 for skill in prd-plan prd-execute prd-status; do
     [ -d "$CLAUDE_DIR/skills/$skill" ] && rm -rf "$CLAUDE_DIR/skills/$skill" && echo -e "  ${GREEN}✓${NC} Removed skill: $skill"
+done
+
+# Remove Codex skills
+for skill in prd-plan prd-execute prd-status; do
+    [ -d "$CODEX_DIR/skills/$skill" ] && rm -rf "$CODEX_DIR/skills/$skill" && echo -e "  ${GREEN}✓${NC} Removed Codex skill: $skill"
 done
 
 echo ""
